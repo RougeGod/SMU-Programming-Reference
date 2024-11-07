@@ -127,13 +127,22 @@ def two_lines_intersect(x1, y1, x2, y2, x3, y3, x4, y4): #where the first line g
     except ZeroDivisionError: #lines have the same slope (no single intersection)
         return False, False #though they may be the same line
 
-def prime_check(n):
-    if n < 2:
-        return False
-    for i in range(2, int(math.sqrt(n)) + 1):
-        if n % i == 0:
-            return False
-    return True
+#number n is prime if it is <= 2 ** 32, odd, and passes sprp_test for a = 2, a = 7, and a = 61
+#optimal setup: trial division by all primes up to 300 or so, then run this test
+def sprp_test(n, a):
+    d = n - 1
+    s = 0
+    while (d % 2 == 1):
+        s += 1
+        d //= 2
+    test = pow(a, d, n)
+    if test == 1 or test == n - 1:
+        return True
+    for r in range(1, s):
+        test = pow(test, 2, n)
+        if test == n - 1:
+            return True
+    return False
 
 def left_predicate(x1, y1, x2, y2, px, py): #where the line is (x1, y1) -> (x2, y2) and the point is at (px, py)
     return (x2 - x1) * (py - y1) - (y2 - y1)*(px - x1) > 0
@@ -288,7 +297,7 @@ class GenericTreeNode(object):
 #for a question like the CEO question where we;re given the parent, 
 #put them in a list, and have a list of tree nodes, it's not ideal but what else do you do?
 
-###Prime factorization of any integer
+###Prime factorization of any integer (very slow for large numbers)
 import math 
 def primeFactors(n): 
     while n % 2 == 0: 
