@@ -126,7 +126,8 @@ def two_lines_intersect(x1, y1, x2, y2, x3, y3, x4, y4): #where the first line g
         #answer[1] is "where do they intersect", even if it's out of bounds. 
     except ZeroDivisionError: #lines have the same slope (no single intersection)
         return False, False #though they may be the same line
-
+def is_in_sorted(ls,n): #find if n is in the sorted list ls
+    return bisect_left(ls, n) < len(ls) and ls[bisect_left(ls, n)] == n
 #number n is prime if it is <= 2 ** 32, odd, and passes sprp_test for a = 2, a = 7, and a = 61
 #optimal setup: trial division by all primes up to 300 or so, then run this test
 def sprp_test(n, a):
