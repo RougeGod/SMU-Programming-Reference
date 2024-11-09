@@ -10,7 +10,6 @@ field = []
 START_POINT = (0, 0)  # set these values later
 END_POINT = (0, 0)
 
-
 def process():
     numOfLines = 41  # get this from an opening input() statement
     for count in range(numOfLines):
@@ -489,77 +488,51 @@ def findgrandkids(root):
         output += grandkids
     output = list(set(output))  # remove duplicate elements
     return output
-
-
 print(maximize(0))
-
 
 # Line and Point functions from cp4
 
 INF = 10**9
-EPS = 1e-9
-
-
+EPS = 1e-6
 def DEG_to_RAD(d):
     return d*math.pi/180.0
-
-
 def RAD_to_DEG(r):
     return r*180.0/math.pi
-
-
 class point_i:
     def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
-
-
 class point:
     def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
-
     def __lt__(self, other):
         return (self.x, self.y) < (other.x, other.y)
-
     def __eq__(self, other):
         return math.isclose(self.x, other.x) and math.isclose(self.y, other.y)
-
-
 def dist(p1, p2):
     return math.hypot(p1.x-p2.x, p1.y-p2.y)
-
 # Rotate a point by theta
-
-
 def rotate(p, theta):
     rad = DEG_to_RAD(theta)
     x = p.x * math.cos(rad) - p.y * math.sin(rad)
     y = p.x * math.sin(rad) + p.y * math.cos(rad)
     return point(x, y)
-
-
 class line:
     def __init__(self):
         self.a = 0
         self.b = 0
         self.c = 0
-
-
 def pointsToLine(p1, p2, l):
     if abs(p1.x - p2.x) < EPS:
         l.a, l.b, l.c = 1.0, 0.0, -p1.x
     else:
         a = -(p1.y - p2.y) / (p1.x - p2.x)
         l.a, l.b, l.c = a, 1.0, -(a * p1.x) - p1.y
-
-
 class line2:
     def __init__(self):
         self.m = 0
         self.c = 0
-
-
 def pointsToLine2(p1, p2, l):
     if p1.x == p2.x:
         l.m = INF
@@ -571,18 +544,11 @@ def pointsToLine2(p1, p2, l):
         return 1
 
 # Check if two lines are parallel
-
-
 def areParallel(l1, l2):
     return math.isclose(l1.a, l2.a) and math.isclose(l1.b, l2.b)
-
 # Check if two lines are same
-
-
 def areSame(l1, l2):
     return areParallel(l1, l2) and math.isclose(l1.c, l2.c)
-
-
 def areIntersect(l1, l2, p):
     if areParallel(l1, l2):
         return False
@@ -593,29 +559,19 @@ def areIntersect(l1, l2, p):
         p.y = -(l2.a * p.x + l2.c)
     return True
 
-
 class vec:
     def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
-
-
 def toVec(a, b):
     return vec(b.x-a.x, b.y-a.y)
-
-
 def scale(v, s):
     return vec(v.x*s, v.y*s)
-
-
 def translate(p, v):
     return point(p.x+v.x, p.y+v.y)
-
-
 def pointSlopeToLine(p, m, l):
     l.a, l.b = -m, 1
     l.c = -((l.a * p.x) + (l.b * p.y))
-
 
 def closestPoint(l, p, ans):
     if math.isclose(l.b, 0.0):
@@ -636,21 +592,14 @@ def reflectionPoint(l, p, ans):
     ans.x, ans.y = p.x + 2 * v.x, p.y + 2 * v.y
 
 # Dot Product
-
-
 def dot(a, b):
     return a.x * b.x + a.y * b.y
-
-
 def norm_sq(v):
     return v.x * v.x + v.y * v.y
-
-
 def angle(a, o, b):
     oa = toVec(o, a)
     ob = toVec(o, b)
     return math.acos(dot(oa, ob) / math.sqrt(norm_sq(oa) * norm_sq(ob)))
-
 
 def distToLine(p, a, b, c):
     ap = toVec(a, p)
@@ -659,8 +608,6 @@ def distToLine(p, a, b, c):
     s = scale(ab, u)
     c.x, c.y = a.x+s.x, a.y+s.y
     return dist(p, c)
-
-
 def distToLineSegment(p, a, b, c):
     ap = toVec(a, p)
     ab = toVec(a, b)
@@ -672,15 +619,44 @@ def distToLineSegment(p, a, b, c):
         c.x, c.y = b.x, b.y
         return dist(p, b)
     return distToLine(p, a, b, c)
-
-
 def cross(a, b):
     return a.x * b.y - a.y * b.x
-
-
 def ccw(p, q, r):
     return cross(toVec(p, q), toVec(p, r)) > -EPS
-
-
 def collinear(p, q, r):
     return abs(cross(toVec(p, q), toVec(p, r))) < EPS
+
+def gcdExtended(a, b):
+    # Base Case
+    if a == 0 :
+        return b,0,1
+    gcd,x1,y1 = gcdExtended(b%a, a)
+    # Update x and y using results of recursive
+    # call
+    x = y1 - (b//a) * x1
+    y = x1
+    return gcd,x,y
+	#returns ax+by such that ax+by=gcd
+
+#boggle algorithm, useful for 2-D grid traversal
+#note that the boggle grid is 4x4
+def find_words(self, board):
+    def dfs(row, col, path, node, word):
+        # Helper function for depth-first search to find words on the board
+        if not (0 <= row < 4) or not (0 <= col < 4) or (row, col) in path:
+            return
+        letter = board[row][col]
+        if letter in node:
+            path.append((row, col))
+            node = node[letter]
+            word += letter
+            if '*' in node and len(word) > 2:
+                self.validated.add(word)
+            for dr in [-1, 0, 1]:
+                for dc in [-1, 0, 1]:
+                    dfs(row + dr, col + dc, path, node, word)
+            path.pop()
+    # Iterate through the entire board to find words
+    for r in range(4):
+        for c in range(4):
+            dfs(r, c, [], self.root, '')
