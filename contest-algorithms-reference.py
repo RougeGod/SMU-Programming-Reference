@@ -332,20 +332,102 @@ n = len(points)
 convexHull(points, n)
 # END GRAHAM SCAN ALGORITHM
 
-# Making and traversing trees
+##UNION FIND
+class TreeNode:
+    def __init__(self):
+        self.parent = self
+        self.size = 1
 
+    def find_ancestor(self):
+    #performs two tasks: finding the ancestor and flattening the tree
+    #the tree flattening makes it faster to find ancestors in future
+        root = self
+        x = self
+        while root.parent != root:
+            root = root.parent
+            #root is now the "representative" of the whole set, at the top
+        while x.parent != root:
+            new_parent = x.parent
+            x.parent = root
+            x = new_parent
+        return root
 
-class GenericTreeNode(object):
-    # where measurement is something we need to keep track of like fun score
-    def __init__(self, children, measurement):
-        self.children = children
-        self.measurement = measurement
+    def merge(self, u2):
+        u1_rep = self.find_ancestor()
+        u2_rep = u2.find_ancestor()
+        if u1_rep == u2_rep:
+            return #no need to merge, they're in the same network already
+        largest_rep = u1_rep if u1_rep.size > u2_rep.size else u2_rep
+        smallest_rep = u2_rep if largest_rep == u1_rep else u1_rep
+        smallest_rep.parent = largest_rep #merge the smaller network into the larger one
+        largest_rep.size += smallest_rep.size
+        del smallest_rep.size #maybe a memory optimization, smaller rep's size never used
 
-    def getChildren():
-        return self.children
+#to create a relationship between u1 and u2, use u1.merge(u2)
+#to see if u1 and u2 are in the same network, compare u1.find_ancestor() == u2.find_ancestor()
 
-    def getGrandchildren():
-        return [child.getChildren() for child in children]
+#CEO Problem Solution from last year (mostly): Uses Trees and Dynamic Programming
+#passes most test cases so it's an OK example
+class TreeNode:
+    def __init__(self, val):
+        self.childlist = []
+        self.val = val
+        self.parent = None
+    def addchild(self, child):
+        self.childlist.append(child)
+    def setparent(self, parent):
+        self.parent = parent
+        self.parent.addchild(self)
+    def getgrandchildren(self):
+        output = []
+        for kid in self.childlist:
+            output.extend(kid.childlist)
+        #like append but can append all list elements to the end of the list
+        return output
+
+numLines = int(input())
+emps = []
+emps_tuples = []
+for count in range(numLines):  # first pass
+    line = [int(i) for i in input().split(sep=" ")]
+    emps_tuples.append((line[0], line[1]))
+    emps.append(TreeNode(line[0], count))
+
+for count in range(1, numLines):  # second pass, everything but the root
+    line = emps_tuples[count]
+    emps[count].setparent(emps[line[1]])
+del emps_tuples
+
+sols = {}
+def maximize(root):
+    if root.childlist == []:
+        return root.val
+    if root.empnum in sols:
+        return sols[root.empnum]
+    included = root.val + sum([maximize(i) for i in root.getgrandchildren()])
+    excluded = sum(maximize(i) for i in root.childlist)
+    sols[root.empnum] = max(included, excluded)
+    return sols[root.empnum]
+print(maximize(emps[0]))
+
+#powerset of an iterable
+from itertools import chain, combinations
+def powerset(iterable):
+    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+
+#EDIT DISTANCE
+Suppose that we are given a string x of length n and a string y of length m,
+and we want to calculate the edit distance between x and y. To solve the problem,
+we define a function distance(a, b) that gives the edit distance between prefixes
+x[0 . . . a] and y[0 . . . b]. Thus, using this function, the edit distance between x and
+y equals distance(n − 1, m − 1).
+We can calculate values of distance as follows:
+distance(a, b) = min(distance(a, b − 1) + 1,
+distance(a − 1, b) + 1,
+distance(a − 1, b − 1) + cost(a, b)).
+Here cost(a, b) = 0 if x[a] = y[b], and otherwise cost(a, b) = 1.
 # for a question like the CEO question where we;re given the parent,
 # put them in a list, and have a list of tree nodes, it's not ideal but what else do you do?
 
@@ -408,9 +490,8 @@ def optimal_rectangle_cut(i, j):
         width - count, height) for count in range(1, width // 2 + 1)])
     memo[(height, width)] = min(hcut, vcut)
     return memo[(height, width)]
+
 # where W is the max weight of the backpack, wt is an array of weights, and val is an array of values
-
-
 def knapSack(W, wt, val):
     n = len(val)
     table = [[0 for x in range(W + 1)] for x in range(n + 1)]
@@ -430,7 +511,6 @@ def knapSack(W, wt, val):
 
 
 def is_palindrome(string, i, j):
-
     while i < j:
         if string[i] != string[j]:
             return False
@@ -452,43 +532,6 @@ def min_pal_partition(string, i, j):
             min_pal_partition(string, k + 1, j) + 1
         ans = min(ans, count)
     return ans
-
-
-# CEO Problem Solution from last year (maybe): Example of Dynamic Programming
-numOfEmployees = int(input())
-
-emps = []
-for count in range(numOfEmployees):
-    empstring = input().split(sep=" ")
-    emps.append((int(empstring[0]), int(empstring[1])))
-
-
-def maximize(root):
-    if findkids(root) == []:
-        return emps[root][0]
-    kids = findkids(root)
-    grandkids = findgrandkids(root)
-    included = emps[root][0] + sum([maximize(i) for i in grandkids])
-    excluded = sum([maximize(i) for i in kids])
-    return max(included, excluded)
-
-
-def findkids(root):
-    output = []
-    for count in range(len(emps)):
-        if emps[count][1] == root and count != 0:
-            output.append(count)
-    return output
-
-
-def findgrandkids(root):
-    output = []
-    for kid in findkids(root):
-        grandkids = findkids(kid)
-        output += grandkids
-    output = list(set(output))  # remove duplicate elements
-    return output
-print(maximize(0))
 
 # Line and Point functions from cp4
 
